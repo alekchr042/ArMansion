@@ -53,21 +53,47 @@ public class PlaceOnPlane : MonoBehaviour
         }
     }
 
+    //private byte[] GetCameraImage()
+    //{
+    //    CameraImage image;
+    //    if (!cameraManager.TryGetLatestImage(out image))
+    //        return;
+
+    //    // Consider each image plane
+    //    for (int planeIndex = 0; planeIndex < image.planeCount; ++planeIndex)
+    //    {
+    //        // Log information about the image plane
+    //        CameraImagePlane plane = image.GetPlane(planeIndex);
+    //        Debug.LogFormat("Plane {0}:\n\tsize: {1}\n\trowStride: {2}\n\tpixelStride: {3}",
+    //            planeIndex, plane.data.Length, plane.rowStride, plane.pixelStride);
+
+    //        // Do something with the data:
+    //        MyComputerVisionAlgorithm(plane.data);
+    //    }
+
+    //    // You must dispose the CameraImage to avoid resource leaks.
+    //    image.Dispose();
+    //}
+
     private Texture2D CaptureCameraTexture()
     {
-        RenderTexture renderTexture = new RenderTexture(Screen.width, Screen.height, 24, RenderTextureFormat.ARGB32);
+        //var activeRenderTexture = RenderTexture.active;
 
-        Graphics.Blit(null, renderTexture, cameraBackground.material);
+        //RenderTexture renderTexture = new RenderTexture(Screen.width, Screen.height, 24, RenderTextureFormat.ARGB32);
 
-        Texture2D cameraTexture = new Texture2D(Screen.width, Screen.height);
+        var cameraTexture = new Texture2D(Screen.width, Screen.height, TextureFormat.RGB24, true);
 
-        RenderTexture.active = renderTexture;
+        //Graphics.Blit(null, renderTexture, cameraBackground.material);
 
-        cameraTexture.ReadPixels(new Rect(0, 0, renderTexture.width, renderTexture.height), 0, 0);
+        //RenderTexture.active = renderTexture;
 
-        cameraTexture.Apply();
+        cameraTexture.ReadPixels(new Rect(0, 0, Screen.width, Screen.height), 0, 0);
 
-        RenderTexture.active = null;
+        //cameraTexture.Resize(Screen.width / 3, Screen.height / 3);
+
+        //cameraTexture.Apply();
+
+        //RenderTexture.active = activeRenderTexture;
 
         return cameraTexture;
     }

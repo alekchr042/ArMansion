@@ -54,21 +54,23 @@ public class PatternDetector : MonoBehaviour
     private IEnumerator MakePredictionRequest(byte[] byteData)
     {
         Debug.Log("Got into prediction method");
-        using (UnityWebRequest uwr = UnityWebRequest.Post(Settings.ApiURL, "POST"))
+        WWWForm webForm = new WWWForm();
+        using (UnityWebRequest uwr = UnityWebRequest.Post(Settings.ApiURL, webForm))
         {
-            uwr.uploadHandler = (UploadHandler)new UploadHandlerRaw(byteData);
-            uwr.downloadHandler = (DownloadHandler)new DownloadHandlerBuffer();
             uwr.SetRequestHeader("Content-Type", Settings.ContentType);
             uwr.SetRequestHeader("Prediction-Key", Settings.PredictionKey);
 
+            uwr.uploadHandler = new UploadHandlerRaw(byteData);
+            uwr.uploadHandler.contentType = Settings.ContentType;
+
+            uwr.downloadHandler = new DownloadHandlerBuffer();
+
             Debug.Log("Sending prediction request");
-            Console.WriteLine("Sending prediction request");
             yield return uwr.SendWebRequest();
 
             if (uwr.result != UnityWebRequest.Result.Success)
             {
                 Debug.Log(uwr.error);
-                Console.WriteLine(uwr.error);
             }
             else
             {
@@ -76,7 +78,6 @@ public class PatternDetector : MonoBehaviour
                 var resposeData = uwr.downloadHandler.data;
 
                 Debug.Log("Received: " + responseMessage);
-                Console.WriteLine(responseMessage);
             }
         }
     }
