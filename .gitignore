@@ -58,3 +58,6 @@ sysinfo.txt
 # Crashlytics generated file
 crashlytics-build.properties
 
+#App settings with all keys and secrets
+/Assets/Settings*
+

@@ -9,9 +9,13 @@ public class PlaceOnPlane : MonoBehaviour
 
     private ARRaycastManager raycastManager;
 
-    List<ARRaycastHit> hits;
+    private ARCameraBackground cameraBackground;
+
+    private PatternDetector patternDetector;
 
     public GameObject PrefabToPlace;
+
+    List<ARRaycastHit> hits;
 
     // Start is called before the first frame update
     void Start()
@@ -19,6 +23,10 @@ public class PlaceOnPlane : MonoBehaviour
         sessionOrigin = GetComponent<ARSessionOrigin>();
 
         raycastManager = GetComponent<ARRaycastManager>();
+
+        cameraBackground = GetComponent<ARCameraBackground>();
+
+        patternDetector = GetComponent<PatternDetector>();
 
         hits = new List<ARRaycastHit>();
     }
@@ -32,13 +40,35 @@ public class PlaceOnPlane : MonoBehaviour
 
             if (touch.phase == TouchPhase.Began)
             {
-                if (raycastManager.Raycast(touch.position, hits, UnityEngine.XR.ARSubsystems.TrackableType.PlaneWithinPolygon))
-                {
-                    var pose = hits[0].pose;
+                //if (raycastManager.Raycast(touch.position, hits, UnityEngine.XR.ARSubsystems.TrackableType.PlaneWithinPolygon))
+                //{
+                //    var pose = hits[0].pose;
 
-                    Instantiate(PrefabToPlace, pose.position, pose.rotation);
-                }
+                //    Instantiate(PrefabToPlace, pose.position, pose.rotation);
+                //}
+                var cameraTexture = CaptureCameraTexture();
+
+                patternDetector.SearchForPattern(cameraTexture);
             }
         }
+    }
+
+    private Texture2D CaptureCameraTexture()
+    {
+        RenderTexture renderTexture = new RenderTexture(Screen.width, Screen.height, 24, RenderTextureFormat.ARGB32);
+
+        Graphics.Blit(null, renderTexture, cameraBackground.material);
+
+        Texture2D cameraTexture = new Texture2D(Screen.width, Screen.height);
+
+        RenderTexture.active = renderTexture;
+
+        cameraTexture.ReadPixels(new Rect(0, 0, renderTexture.width, renderTexture.height), 0, 0);
+
+        cameraTexture.Apply();
+
+        RenderTexture.active = null;
+
+        return cameraTexture;
     }
 }
