@@ -53,28 +53,6 @@ public class PlaceOnPlane : MonoBehaviour
         }
     }
 
-    //private byte[] GetCameraImage()
-    //{
-    //    CameraImage image;
-    //    if (!cameraManager.TryGetLatestImage(out image))
-    //        return;
-
-    //    // Consider each image plane
-    //    for (int planeIndex = 0; planeIndex < image.planeCount; ++planeIndex)
-    //    {
-    //        // Log information about the image plane
-    //        CameraImagePlane plane = image.GetPlane(planeIndex);
-    //        Debug.LogFormat("Plane {0}:\n\tsize: {1}\n\trowStride: {2}\n\tpixelStride: {3}",
-    //            planeIndex, plane.data.Length, plane.rowStride, plane.pixelStride);
-
-    //        // Do something with the data:
-    //        MyComputerVisionAlgorithm(plane.data);
-    //    }
-
-    //    // You must dispose the CameraImage to avoid resource leaks.
-    //    image.Dispose();
-    //}
-
     private Texture2D CaptureCameraTexture()
     {
         //var activeRenderTexture = RenderTexture.active;

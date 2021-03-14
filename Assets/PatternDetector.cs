@@ -31,26 +31,6 @@ public class PatternDetector : MonoBehaviour
         StartCoroutine(MakePredictionRequest(imageByteArray));
     }
 
-    //private static async IEnumerable<HttpResponseMessage> MakePredictionRequest(byte[] byteData)
-    //{
-    //    var client = new HttpClient();
-
-    //    client.DefaultRequestHeaders.Add("Prediction-Key", Settings.PredictionKey);
-
-    //    HttpResponseMessage response;
-
-    //    using (var content = new ByteArrayContent(byteData))
-    //    {
-    //        content.Headers.ContentType = new MediaTypeHeaderValue(Settings.ContentType);
-
-    //        response = await client.PostAsync(Settings.ApiURL, content);
-
-    //        Debug.Log(response);
-    //    }
-
-    //    yield return response;
-    //}
-
     private IEnumerator MakePredictionRequest(byte[] byteData)
     {
         Debug.Log("Got into prediction method");
@@ -63,7 +43,7 @@ public class PatternDetector : MonoBehaviour
             uwr.uploadHandler = new UploadHandlerRaw(byteData);
             uwr.uploadHandler.contentType = Settings.ContentType;
 
-            uwr.downloadHandler = new DownloadHandlerBuffer();
+            uwr.downloadHandler = (DownloadHandler)new DownloadHandlerBuffer();
 
             Debug.Log("Sending prediction request");
             yield return uwr.SendWebRequest();
@@ -83,7 +63,7 @@ public class PatternDetector : MonoBehaviour
     }
 
     private static byte[] GetImageAsByteArray(Texture2D texture)
-    {
-        return texture.GetRawTextureData();
+    {  
+        return ImageConversion.EncodeToJPG(texture);
     }
 }

@@ -213,7 +213,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e1760703bbd54c04488a8d10600262ab, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_PlanePrefab: {fileID: 6949614289996535157, guid: 077f58919f4b95a4391817841babf469, type: 3}
+  m_PlanePrefab: {fileID: 0}
   m_DetectionMode: -1
 --- !u!114 &236667747
 MonoBehaviour:
@@ -490,6 +490,10 @@ PrefabInstance:
     - target: {fileID: 6949614289996535157, guid: 077f58919f4b95a4391817841babf469, type: 3}
       propertyPath: m_Name
       value: AR Default Plane
+      objectReference: {fileID: 0}
+    - target: {fileID: 6949614289996535157, guid: 077f58919f4b95a4391817841babf469, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6949614289996535162, guid: 077f58919f4b95a4391817841babf469, type: 3}
       propertyPath: m_RootOrder
