@@ -1,3 +1,4 @@
+using Assets;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -12,6 +13,8 @@ public class PlaceOnPlane : MonoBehaviour
     private ARCameraBackground cameraBackground;
 
     private PatternDetector patternDetector;
+
+    private RecognitionResponse lastRecognition;
 
     public GameObject PrefabToPlace;
 
@@ -48,7 +51,7 @@ public class PlaceOnPlane : MonoBehaviour
                 //}
                 var cameraTexture = CaptureCameraTexture();
 
-                patternDetector.SearchForPattern(cameraTexture);
+                patternDetector.SearchForObject(cameraTexture);
             }
         }
     }
