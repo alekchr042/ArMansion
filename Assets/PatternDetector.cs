@@ -1,5 +1,4 @@
 using Assets;
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,8 +10,10 @@ using UnityEngine.XR.ARSubsystems;
 public class PatternDetector : MonoBehaviour
 {
     private RecognitionResponse lastRecognition;
-    private ARRaycastManager raycastManager;
 
+    private GameObject placedObject;
+
+    private ARRaycastManager raycastManager;
 
     public GameObject PrefabToPlace;
 
@@ -22,7 +23,6 @@ public class PatternDetector : MonoBehaviour
     void Start()
     {
         raycastManager = GetComponent<ARRaycastManager>();
-
     }
 
     // Update is called once per frame
@@ -30,40 +30,44 @@ public class PatternDetector : MonoBehaviour
     {
 
     }
-
-    public void SearchForObject(Texture2D cameraTexture)
+    private Texture2D CaptureCameraTexture()
     {
-        var imageByteArray = GetImageAsByteArray(cameraTexture);
+        var cameraTexture = new Texture2D(Screen.width, Screen.height, TextureFormat.RGB24, true);
 
-        Debug.Log("Touch detected - sending request");
+        cameraTexture.ReadPixels(new Rect(0, 0, Screen.width, Screen.height), 0, 0);
 
-        StartCoroutine(MakePredictionRequest(imageByteArray));
+        return cameraTexture;
+    }
+
+    public void SearchForObject()
+    {
+        var cameraTexture = CaptureCameraTexture();
+
+        if (lastRecognition == null) //TODO: w tej chwili wstawianie obiektu odbywa siê tylko raz, mo¿e warto co jakiœ czas usun¹æ stary obiekt i podmieniæ go na nowy?
+        {
+            var imageByteArray = GetImageAsByteArray(cameraTexture);
+
+            StartCoroutine(MakePredictionRequest(imageByteArray));
+        }
     }
 
     private IEnumerator MakePredictionRequest(byte[] byteData)
     {
         Debug.Log("Got into prediction method");
         WWWForm webForm = new WWWForm();
-        using (UnityWebRequest uwr = UnityWebRequest.Post(Settings.ApiURL, webForm))
+        using (UnityWebRequest request = UnityWebRequest.Post(Settings.ApiURL, webForm))
         {
-            uwr.SetRequestHeader("Content-Type", Settings.ContentType);
-            uwr.SetRequestHeader("Prediction-Key", Settings.PredictionKey);
+            PrepareWebRequest(request, byteData);
 
-            uwr.uploadHandler = new UploadHandlerRaw(byteData);
-            uwr.uploadHandler.contentType = Settings.ContentType;
+            yield return request.SendWebRequest();
 
-            uwr.downloadHandler = (DownloadHandler)new DownloadHandlerBuffer();
-
-            Debug.Log("Sending prediction request");
-            yield return uwr.SendWebRequest();
-
-            if (uwr.result != UnityWebRequest.Result.Success)
+            if (request.result != UnityWebRequest.Result.Success)
             {
-                Debug.Log(uwr.error);
+                Debug.Log(request.error);
             }
             else
             {
-                var responseMessage = uwr.downloadHandler.text;
+                var responseMessage = request.downloadHandler.text;
 
                 var recognition = GetRecognitionResponse(responseMessage);
 
@@ -73,10 +77,21 @@ public class PatternDetector : MonoBehaviour
 
                     PlaceObjectInDetectedPlace();
                 }
-
-                Debug.Log("Received: " + responseMessage);
             }
         }
+    }
+
+    private void PrepareWebRequest(UnityWebRequest request, byte[] content)
+    {
+        request.SetRequestHeader("Content-Type", Settings.ContentType);
+
+        request.SetRequestHeader("Prediction-Key", Settings.PredictionKey);
+
+        request.uploadHandler = new UploadHandlerRaw(content);
+
+        request.uploadHandler.contentType = Settings.ContentType;
+
+        request.downloadHandler = new DownloadHandlerBuffer();
     }
 
     private byte[] GetImageAsByteArray(Texture2D texture)
@@ -91,34 +106,23 @@ public class PatternDetector : MonoBehaviour
         return recognitionResponse;
     }
 
-    private RecognitionResponse GetLastRecognition()
-    {
-        return lastRecognition;
-    }
-
     private void PlaceObjectInDetectedPlace()
     {
-        var placedObject = Instantiate(PrefabToPlace);
+        var prediction = lastRecognition.predictions.FirstOrDefault();
 
-        var bounds = placedObject.GetComponent<MeshRenderer>()?.bounds;
+        Vector3 position = Vector3.zero;
 
-        if (bounds.HasValue)
-        {
-            var prediction = lastRecognition.predictions.FirstOrDefault();
+        Quaternion rotation = new Quaternion();
 
-            Vector3 position = Vector3.zero;
+        var detectedObjectPosition = CalculateCenterOfDetectedObject(prediction);
 
-            var detectedObjectPosition = CalculateCenterOfDetectedObject(prediction);
+        var isPositionFound = GetArRaycastLogic(out position, out rotation, detectedObjectPosition);
 
-            var foundPosition = GetArRaycastLogic(out position, detectedObjectPosition);
-
-            //var position = CalculateBoundingBoxPosition(bounds.Value, prediction.boundingBox);
-
-            placedObject.transform.position = position;
-        }
+        if (isPositionFound)
+            placedObject = Instantiate(PrefabToPlace, position, rotation);
     }
 
-    private Vector3 CalculateCenterOfDetectedObject(Prediction prediction)
+    private Vector2 CalculateCenterOfDetectedObject(Prediction prediction)
     {
         var boundingBox = prediction.boundingBox;
 
@@ -126,25 +130,18 @@ public class PatternDetector : MonoBehaviour
 
         float centerFromTop = (float)(boundingBox.top + (boundingBox.height / 2));
 
-        return new Vector3(centerFromLeft, centerFromTop, .0f);
+        var positionOnScreen = PlaceInScreenCoords(centerFromLeft, centerFromTop); //Z bounding boxa mo¿emy ustaliæ pozycje w zakresie 0-1, trzeba to przemno¿yæ przez faktyczne rozmiary ekranu
+
+        return positionOnScreen;
     }
 
-    private Vector3 CalculateBoundingBoxPosition(Bounds b, BoundingBox boundingBox)
+    private Vector2 PlaceInScreenCoords(float x, float y)
     {
-        Debug.Log($"BB: left {boundingBox.left}, top {boundingBox.top}, width {boundingBox.width}, height {boundingBox.height}");
+        var newX = x * Screen.width;
 
-        double centerFromLeft = boundingBox.left + (boundingBox.width / 2);
-        double centerFromTop = boundingBox.top + (boundingBox.height / 2);
-        Debug.Log($"BB CenterFromLeft {centerFromLeft}, CenterFromTop {centerFromTop}");
+        var newY = y * Screen.height;
 
-        double quadWidth = b.size.normalized.x;
-        double quadHeight = b.size.normalized.y;
-        Debug.Log($"Quad Width {b.size.normalized.x}, Quad Height {b.size.normalized.y}");
-
-        double normalisedPos_X = (quadWidth * centerFromLeft) - (quadWidth / 2);
-        double normalisedPos_Y = (quadHeight * centerFromTop) - (quadHeight / 2);
-
-        return new Vector3((float)normalisedPos_X, (float)normalisedPos_Y, 0);
+        return new Vector2(newX, newY);
     }
 
     private bool IsObjectRecognized(RecognitionResponse recognition)
@@ -154,32 +151,28 @@ public class PatternDetector : MonoBehaviour
             var prediction = recognition.predictions.FirstOrDefault();
 
             if (prediction != null && prediction.probability > ProbabilityTreshold)
-            {
                 return true;
-            }
         }
 
         return false;
     }
 
-    bool GetArRaycastLogic(out Vector3 hitPosition, Vector3 detectedPosition)
+    bool GetArRaycastLogic(out Vector3 hitPosition, out Quaternion rotation, Vector2 pos)
     {
-
-        // 1
         var hits = new List<ARRaycastHit>();
 
-        // 2
-        bool hasHit = raycastManager.Raycast(detectedPosition, hits, TrackableType.PlaneWithinInfinity);
+        bool hasHit = raycastManager.Raycast(pos, hits, TrackableType.PlaneWithinPolygon);
 
-        // 3
         if (hasHit == false || hits.Count == 0)
         {
             hitPosition = Vector3.zero;
+            rotation = new Quaternion();
             return false;
         }
         else
         {
             hitPosition = hits[0].pose.position;
+            rotation = hits[0].pose.rotation;
             return true;
         }
     }
