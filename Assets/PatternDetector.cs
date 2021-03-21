@@ -11,7 +11,7 @@ public class PatternDetector : MonoBehaviour
 {
     private RecognitionResponse lastRecognition;
 
-    private GameObject placedObject;
+    public GameObject placedObject;
 
     private ARRaycastManager raycastManager;
 
