@@ -50,10 +50,13 @@ public class LocateAndAnchor : MonoBehaviour
                 var touch = Input.GetTouch(0);
                 var hits = new List<ARRaycastHit>();
 
-                if (touch.phase == TouchPhase.Began)
+                //if (touch.phase == TouchPhase.Began)
                 {
-                    Debug.Log("Touched. Anchor removed");
-                    anchorManager.RemoveAnchor(anchor);
+                    if (anchor != null)
+                    {
+                        Debug.Log("Touched. Anchor removed");
+                        anchorManager.RemoveAnchor(anchor);
+                    }
 
                     if (raycastManager.Raycast(touch.position, hits, UnityEngine.XR.ARSubsystems.TrackableType.PlaneWithinPolygon))
                     {

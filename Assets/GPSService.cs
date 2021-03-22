@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Android;
 
 public class GPSService : MonoBehaviour
 {
@@ -26,6 +27,7 @@ public class GPSService : MonoBehaviour
     {
         Instance = this;
         DontDestroyOnLoad(gameObject);
+        Permission.RequestUserPermission(Permission.FineLocation);
         StartCoroutine(ContinousGPSService());
     }
     private IEnumerator ContinousGPSService()
@@ -34,7 +36,7 @@ public class GPSService : MonoBehaviour
         {
             //Debug.Log("Starting GPS query");
             StartCoroutine(StartLocationService());
-            yield return new WaitForSeconds(1);
+            yield return new WaitForSeconds(.5f);
         }
     }
     private IEnumerator StartLocationService()
