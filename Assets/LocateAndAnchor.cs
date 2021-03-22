@@ -38,12 +38,14 @@ public class LocateAndAnchor : MonoBehaviour
         if (plane.trackables.count > 0)
         {
             canDraw = true;
-            planesDetected.text = "Planes detected";
+            //planesDetected.text = "Planes detected";
         }
         if (GPSService.Instance.IsInVisibleRadius() && GPSService.Instance.IsLookingAtCoords())
         {
+            ArrowPrefab.SetActive(false);
+            planesDetected.text = "In area range";
             // Planes detected and not placed already and Is in Range and is Looking at it
-            if (canDraw && !placed && Input.touchCount > 0 && GPSService.Instance.IsInVisibleRadius() && GPSService.Instance.IsLookingAtCoords())
+            if (canDraw && !placed && Input.touchCount > 0)
             {
                 var touch = Input.GetTouch(0);
                 var hits = new List<ARRaycastHit>();
@@ -83,11 +85,17 @@ public class LocateAndAnchor : MonoBehaviour
         }
         else
         {
+            ArrowPrefab.SetActive(true);
+            planesDetected.text = "";
             if (!GPSService.Instance.IsInVisibleRadius())
             {
+                planesDetected.text += " Out of area. ";
+            }
+            if (!GPSService.Instance.IsLookingAtCoords())
+            {
+                planesDetected.text += " Wrong direction";
                 ArrowPrefab.transform.rotation = new Quaternion(90, (float)GPSService.Instance.GetHeading(), 0, 1);
             }
-
         }
 
     }
