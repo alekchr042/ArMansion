@@ -408,6 +408,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2afd384437c942e489c80794f659f728, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  placedObject: {fileID: 0}
   PrefabToPlace: {fileID: 100000, guid: f74defbe1b9a23449aef9a881263fe0c, type: 3}
   ProbabilityTreshold: 0.5
 --- !u!114 &236667751
@@ -440,6 +441,7 @@ MonoBehaviour:
   plane: {fileID: 236667746}
   raycastManager: {fileID: 236667745}
   arCamera: {fileID: 1147350317}
+  patternDetector: {fileID: 236667750}
   planesDetected: {fileID: 1776970853}
 --- !u!114 &236667753
 MonoBehaviour:
