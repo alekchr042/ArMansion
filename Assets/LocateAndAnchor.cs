@@ -20,25 +20,27 @@ public class LocateAndAnchor : MonoBehaviour
     [SerializeField]
     private PatternDetector patternDetector;
     private ARAnchor anchor;
+    [SerializeField]
+    private GameObject ArrowPrefab;
 
     public Text planesDetected;
     // Start is called before the first frame update
     void Start()
     {
         planesDetected.text = "No planes detected. Can't anchor";
-       
+        ArrowPrefab.transform.parent = gameObject.transform;
     }
 
 
     // Update is called once per frame
     void Update()
     {
-        if(plane.trackables.count > 0)
+        if (plane.trackables.count > 0)
         {
             canDraw = true;
             planesDetected.text = "Planes detected";
         }
-        if(GPSService.Instance.IsInVisibleRadius() && GPSService.Instance.IsLookingAtCoords())
+        if (GPSService.Instance.IsInVisibleRadius() && GPSService.Instance.IsLookingAtCoords())
         {
             // Planes detected and not placed already and Is in Range and is Looking at it
             if (canDraw && !placed && Input.touchCount > 0 && GPSService.Instance.IsInVisibleRadius() && GPSService.Instance.IsLookingAtCoords())
@@ -81,16 +83,12 @@ public class LocateAndAnchor : MonoBehaviour
         }
         else
         {
-            if(!GPSService.Instance.IsInVisibleRadius())
+            if (!GPSService.Instance.IsInVisibleRadius())
             {
-                planesDetected.text = "Rotate to "+ GPSService.Instance.GetHeading();
+                ArrowPrefab.transform.rotation = new Quaternion(90, (float)GPSService.Instance.GetHeading(), 0, 1);
             }
-            else if(!GPSService.Instance.IsInVisibleRadius())
-            {
-                planesDetected.text = "Move " + GPSService.Instance.GetDistance();
-            }
-          
+
         }
-     
+
     }
 }
