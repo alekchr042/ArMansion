@@ -40,9 +40,9 @@ public class LocateAndAnchor : MonoBehaviour
             canDraw = true;
             //planesDetected.text = "Planes detected";
         }
+
         if (GPSService.Instance.IsInVisibleRadius() && GPSService.Instance.IsLookingAtCoords())
         {
-            ArrowPrefab.SetActive(false);
             planesDetected.text = "In area range";
             // Planes detected and not placed already and Is in Range and is Looking at it
             if (canDraw && !placed && Input.touchCount > 0)
@@ -88,7 +88,6 @@ public class LocateAndAnchor : MonoBehaviour
         }
         else
         {
-            ArrowPrefab.SetActive(true);
             planesDetected.text = "";
             if (!GPSService.Instance.IsInVisibleRadius())
             {
@@ -97,9 +96,7 @@ public class LocateAndAnchor : MonoBehaviour
             if (!GPSService.Instance.IsLookingAtCoords())
             {
                 planesDetected.text += " Wrong direction";
-                ArrowPrefab.transform.rotation = new Quaternion(90, (float)GPSService.Instance.GetHeading(), 0, 1);
             }
         }
-
     }
 }

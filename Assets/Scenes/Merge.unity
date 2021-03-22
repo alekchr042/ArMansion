@@ -409,7 +409,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   placedObject: {fileID: 0}
-  PrefabToPlace: {fileID: 100000, guid: f74defbe1b9a23449aef9a881263fe0c, type: 3}
+  PrefabToPlace: {fileID: 919132149155446097, guid: 28a9f0104078c5a4797853d9d5fe0ddb, type: 3}
   ProbabilityTreshold: 0.5
 --- !u!114 &236667751
 MonoBehaviour:
